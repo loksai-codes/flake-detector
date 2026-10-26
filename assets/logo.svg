@@ -1,137 +1,138 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="100%" height="100%">
   <defs>
-    <!-- Background Canvas Gradient -->
+    <!-- Background Gradient -->
     <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#070a12"/>
-      <stop offset="50%" stop-color="#0b1329"/>
-      <stop offset="100%" stop-color="#04060c"/>
+      <stop offset="0%" stop-color="#0a0f1d"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#060913"/>
     </linearGradient>
 
-    <!-- Radial Glow Behind the Icon -->
-    <radialGradient id="center-glow" cx="50%" cy="32%" r="45%">
-      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.18"/>
-      <stop offset="50%" stop-color="#818cf8" stop-opacity="0.08"/>
-      <stop offset="100%" stop-color="#0b1329" stop-opacity="0"/>
-    </radialGradient>
-
-    <!-- Primary Brand Gradient -->
-    <linearGradient id="cyan-violet" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Cyan to Violet Gradient for Primary Geometry -->
+    <linearGradient id="brand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#38bdf8"/>
       <stop offset="50%" stop-color="#818cf8"/>
       <stop offset="100%" stop-color="#c084fc"/>
     </linearGradient>
 
-    <!-- Flake Highlight Gradient -->
-    <linearGradient id="flake-glow-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+    <!-- Flake Branch Glow -->
+    <linearGradient id="flake-accent" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="50%" stop-color="#818cf8"/>
       <stop offset="100%" stop-color="#a855f7"/>
     </linearGradient>
 
-    <!-- Center Pulse Gradient -->
-    <linearGradient id="center-pulse" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Core Center Pulse -->
+    <linearGradient id="core-pulse" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#f43f5e"/>
       <stop offset="100%" stop-color="#fb923c"/>
     </linearGradient>
-
-    <!-- Filter for Soft Bloom -->
-    <filter id="soft-glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="5" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-    </filter>
-
-    <filter id="core-glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="8" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-    </filter>
   </defs>
 
-  <!-- Background Base -->
-  <rect width="800" height="360" rx="20" fill="url(#bg-grad)"/>
-  <rect width="800" height="360" rx="20" fill="url(#center-glow)"/>
-  <rect width="800" height="360" rx="20" fill="none" stroke="#1e293b" stroke-width="1.2"/>
+  <!-- Container Box with Rounded Corners and Subtle Border -->
+  <rect x="2" y="2" width="796" height="356" rx="20" fill="url(#bg-grad)"/>
+  <rect x="2" y="2" width="796" height="356" rx="20" fill="none" stroke="#1e293b" stroke-width="1.5"/>
 
-  <!-- ==================== TOP: CENTERED EMBLEM (cx=400, cy=105) ==================== -->
-  <g transform="translate(400, 105)">
-    <!-- Radar Rings (Confidence Bounds) -->
-    <circle cx="0" cy="0" r="76" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="4 5"/>
+  <!-- Subtle Ambient Glow Layer Behind Icon -->
+  <circle cx="400" cy="110" r="95" fill="#38bdf8" fill-opacity="0.05"/>
+  <circle cx="400" cy="110" r="70" fill="#818cf8" fill-opacity="0.06"/>
+
+  <!-- ==================== TOP ICON (Centered at cx=400, cy=110) ==================== -->
+  <g transform="translate(400, 110)">
+    <!-- Radar Boundaries / Confidence Rings (GitHub-safe dashed circles) -->
+    <circle cx="0" cy="0" r="76" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="5,6"/>
     <circle cx="0" cy="0" r="54" fill="none" stroke="#334155" stroke-width="1.5"/>
-    <circle cx="0" cy="0" r="32" fill="none" stroke="#475569" stroke-width="1.2" stroke-dasharray="2 3"/>
+    <circle cx="0" cy="0" r="32" fill="none" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4"/>
 
-    <!-- Variance Flake Area (Polygon) -->
-    <polygon points="0,-68 46,-36 56,28 12,62 -48,46 -54,-24"
-             fill="#38bdf8" fill-opacity="0.10"
-             stroke="#38bdf8" stroke-opacity="0.45" stroke-width="1.5"/>
+    <!-- Variance Flake Polygon (Statistical Variance Region) -->
+    <polygon points="0,-68 47,-34 54,26 12,62 -48,46 -54,-24"
+             fill="#38bdf8" fill-opacity="0.12"
+             stroke="#38bdf8" stroke-opacity="0.5" stroke-width="1.5"/>
 
-    <!-- Main 6-Axis Flake Structure -->
-    <!-- Axis 1: Vertical -->
-    <line x1="0" y1="-68" x2="0" y2="68" stroke="url(#cyan-violet)" stroke-width="3" stroke-linecap="round"/>
-    <!-- Axis 2: 60 deg -->
-    <line x1="-58.89" y1="-34" x2="58.89" y2="34" stroke="url(#cyan-violet)" stroke-width="3" stroke-linecap="round"/>
-    <!-- Axis 3: 120 deg -->
-    <line x1="-58.89" y1="34" x2="58.89" y2="-34" stroke="url(#cyan-violet)" stroke-width="3" stroke-linecap="round"/>
+    <!-- 6-Axis Snowflake Skeleton with Pure Vector Glow Layers -->
+    <!-- Axis Glow Layers (Wider stroke, low opacity) -->
+    <line x1="0" y1="-68" x2="0" y2="68" stroke="#38bdf8" stroke-width="8" stroke-opacity="0.15" stroke-linecap="round"/>
+    <line x1="-58.89" y1="-34" x2="58.89" y2="34" stroke="#818cf8" stroke-width="8" stroke-opacity="0.15" stroke-linecap="round"/>
+    <line x1="-58.89" y1="34" x2="58.89" y2="-34" stroke="#c084fc" stroke-width="8" stroke-opacity="0.15" stroke-linecap="round"/>
 
-    <!-- Geometric Branchlets (Chevrons on each axis) -->
+    <!-- Sharp Main Axes -->
+    <line x1="0" y1="-68" x2="0" y2="68" stroke="url(#brand-grad)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="-58.89" y1="-34" x2="58.89" y2="34" stroke="url(#brand-grad)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="-58.89" y1="34" x2="58.89" y2="-34" stroke="url(#brand-grad)" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Geometric Branchlets (Chevrons) -->
     <!-- North Branchlets -->
-    <path d="M-13,-45 L0,-56 L13,-45" fill="none" stroke="url(#flake-glow-grad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M-9,-25 L0,-34 L9,-25" fill="none" stroke="url(#flake-glow-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-13,-45 L0,-56 L13,-45" fill="none" stroke="url(#flake-accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-9,-25 L0,-34 L9,-25" fill="none" stroke="url(#flake-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 
     <!-- South Branchlets -->
-    <path d="M-13,45 L0,56 L13,45" fill="none" stroke="url(#flake-glow-grad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M-9,25 L0,34 L9,25" fill="none" stroke="url(#flake-glow-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-13,45 L0,56 L13,45" fill="none" stroke="url(#flake-accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-9,25 L0,34 L9,25" fill="none" stroke="url(#flake-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 
     <!-- North-East Branchlets -->
-    <path d="M34,-41 L48,-28 L47,-13" fill="none" stroke="url(#flake-glow-grad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M34,-41 L48,-28 L47,-13" fill="none" stroke="url(#flake-accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
     <!-- South-East Branchlets -->
-    <path d="M47,13 L48,28 L34,41" fill="none" stroke="url(#flake-glow-grad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M47,13 L48,28 L34,41" fill="none" stroke="url(#flake-accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
     <!-- North-West Branchlets -->
-    <path d="M-47,-13 L-48,-28 L-34,-41" fill="none" stroke="url(#flake-glow-grad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-47,-13 L-48,-28 L-34,-41" fill="none" stroke="url(#flake-accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
     <!-- South-West Branchlets -->
-    <path d="M-34,41 L-48,28 L-47,13" fill="none" stroke="url(#flake-glow-grad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-34,41 L-48,28 L-47,13" fill="none" stroke="url(#flake-accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
 
-    <!-- Outer Vertex Nodes -->
-    <circle cx="0" cy="-68" r="4.5" fill="#38bdf8" filter="url(#soft-glow)"/>
-    <circle cx="58.89" cy="-34" r="4.5" fill="#818cf8" filter="url(#soft-glow)"/>
-    <circle cx="58.89" cy="34" r="4.5" fill="#a855f7" filter="url(#soft-glow)"/>
-    <circle cx="0" cy="68" r="4.5" fill="#c084fc" filter="url(#soft-glow)"/>
-    <circle cx="-58.89" cy="34" r="4.5" fill="#818cf8" filter="url(#soft-glow)"/>
-    <circle cx="-58.89" cy="-34" r="4.5" fill="#38bdf8" filter="url(#soft-glow)"/>
+    <!-- Outer Vertex Nodes with Layered Halo (No Filter) -->
+    <circle cx="0" cy="-68" r="8" fill="#38bdf8" fill-opacity="0.25"/>
+    <circle cx="0" cy="-68" r="4.5" fill="#38bdf8"/>
 
-    <!-- Center Confidence Hub & Pulse -->
+    <circle cx="58.89" cy="-34" r="8" fill="#818cf8" fill-opacity="0.25"/>
+    <circle cx="58.89" cy="-34" r="4.5" fill="#818cf8"/>
+
+    <circle cx="58.89" cy="34" r="8" fill="#a855f7" fill-opacity="0.25"/>
+    <circle cx="58.89" cy="34" r="4.5" fill="#a855f7"/>
+
+    <circle cx="0" cy="68" r="8" fill="#c084fc" fill-opacity="0.25"/>
+    <circle cx="0" cy="68" r="4.5" fill="#c084fc"/>
+
+    <circle cx="-58.89" cy="34" r="8" fill="#818cf8" fill-opacity="0.25"/>
+    <circle cx="-58.89" cy="34" r="4.5" fill="#818cf8"/>
+
+    <circle cx="-58.89" cy="-34" r="8" fill="#38bdf8" fill-opacity="0.25"/>
+    <circle cx="-58.89" cy="-34" r="4.5" fill="#38bdf8"/>
+
+    <!-- Center Hub & Confidence Pulse Indicator -->
     <circle cx="0" cy="0" r="16" fill="#0b1329" stroke="#1e293b" stroke-width="2"/>
-    <circle cx="0" cy="0" r="9" fill="#0f172a" stroke="url(#center-pulse)" stroke-width="2.5" filter="url(#core-glow)"/>
+    <circle cx="0" cy="0" r="12" fill="#f43f5e" fill-opacity="0.2"/>
+    <circle cx="0" cy="0" r="8" fill="#0f172a" stroke="url(#core-pulse)" stroke-width="2.5"/>
     <circle cx="0" cy="0" r="3.5" fill="#fb923c"/>
   </g>
 
-  <!-- ==================== MIDDLE: CENTERED TYPOGRAPHY ==================== -->
+  <!-- ==================== MIDDLE: TYPOGRAPHY ==================== -->
   <!-- Main Title -->
-  <text text-anchor="middle" x="400" y="228"
-        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif"
+  <text text-anchor="middle" x="400" y="232"
+        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
         font-size="44" font-weight="800" letter-spacing="-0.5">
-    <tspan fill="#ffffff">flake</tspan><tspan fill="url(#cyan-violet)">-detector</tspan>
+    <tspan fill="#ffffff">flake</tspan><tspan fill="url(#brand-grad)">-detector</tspan>
   </text>
 
   <!-- Subtitle -->
-  <text text-anchor="middle" x="400" y="260"
-        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif"
-        font-size="15" font-weight="400" fill="#94a3b8" letter-spacing="0.3">
+  <text text-anchor="middle" x="400" y="264"
+        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+        font-size="15" font-weight="400" fill="#94a3b8" letter-spacing="0.2">
     AI Agent Consistency, Flakiness &amp; CI Regression Evaluator
   </text>
 
-  <!-- ==================== BOTTOM: CENTERED BADGES ROW ==================== -->
-  <g transform="translate(180, 286)">
+  <!-- ==================== BOTTOM: FEATURE BADGES ROW ==================== -->
+  <g transform="translate(175, 290)">
     <!-- Badge 1: pass@k vs pass^k -->
-    <rect x="0" y="0" width="138" height="26" rx="13" fill="#111827" stroke="#1f2937" stroke-width="1"/>
-    <circle cx="14" cy="13" r="3" fill="#38bdf8"/>
-    <text x="76" y="17" text-anchor="middle" font-family="'JetBrains Mono', Consolas, monospace" font-size="11" fill="#38bdf8" font-weight="600">pass@k vs pass^k</text>
+    <rect x="0" y="0" width="142" height="26" rx="13" fill="#111827" stroke="#1e293b" stroke-width="1.2"/>
+    <circle cx="15" cy="13" r="3" fill="#38bdf8"/>
+    <text x="78" y="17" text-anchor="middle" font-family="'JetBrains Mono', Consolas, 'Courier New', monospace" font-size="11" fill="#38bdf8" font-weight="600">pass@k vs pass^k</text>
 
     <!-- Badge 2: Wilson 95% CI -->
-    <rect x="150" y="0" width="126" height="26" rx="13" fill="#111827" stroke="#1f2937" stroke-width="1"/>
-    <circle cx="164" cy="13" r="3" fill="#c084fc"/>
-    <text x="218" y="17" text-anchor="middle" font-family="'JetBrains Mono', Consolas, monospace" font-size="11" fill="#c084fc" font-weight="600">Wilson 95% CI</text>
+    <rect x="154" y="0" width="130" height="26" rx="13" fill="#111827" stroke="#1e293b" stroke-width="1.2"/>
+    <circle cx="169" cy="13" r="3" fill="#c084fc"/>
+    <text x="226" y="17" text-anchor="middle" font-family="'JetBrains Mono', Consolas, 'Courier New', monospace" font-size="11" fill="#c084fc" font-weight="600">Wilson 95% CI</text>
 
     <!-- Badge 3: CI Regression Gate -->
-    <rect x="288" y="0" width="152" height="26" rx="13" fill="#111827" stroke="#1f2937" stroke-width="1"/>
-    <circle cx="302" cy="13" r="3" fill="#34d399"/>
-    <text x="370" y="17" text-anchor="middle" font-family="'JetBrains Mono', Consolas, monospace" font-size="11" fill="#34d399" font-weight="600">CI Regression Gate</text>
+    <rect x="296" y="0" width="154" height="26" rx="13" fill="#111827" stroke="#1e293b" stroke-width="1.2"/>
+    <circle cx="311" cy="13" r="3" fill="#34d399"/>
+    <text x="380" y="17" text-anchor="middle" font-family="'JetBrains Mono', Consolas, 'Courier New', monospace" font-size="11" fill="#34d399" font-weight="600">CI Regression Gate</text>
   </g>
 </svg>
