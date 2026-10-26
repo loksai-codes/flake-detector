@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="flake-detector logo" width="700"/>
+  <img src="assets/logo.svg" alt="flake-detector logo" width="720"/>
 </p>
 
 <p align="center">
@@ -18,16 +18,9 @@
 
 ## 💡 The Problem: Single-Run Evaluations Lie
 
-Most AI agent evaluations report a single number from a single run:
+Most AI agent evaluations report a single aggregate number: *"The agent passed 8 out of 10 tasks (80%)."* Because LLMs and autonomous agents are non-deterministic, single-run benchmarks conceal critical variance: a task that passes once but fails four other times looks like a complete success. Teams ship agents that "worked in the demo" only to watch them fail intermittently in production, while prompt tweaks that merely got lucky are mistaken for genuine improvements.
 
-> *"The agent passed 8 out of 10 tasks (80% accuracy)."*
-
-Because LLMs and autonomous agents are non-deterministic, a single run conceals critical variance:
-- A task that passes once but fails four other times looks like a complete success.
-- Teams celebrate agents that "worked in the demo" only to watch them fail inconsistently in production.
-- Prompt tweaks and model swaps often produce lucky runs that masquerade as genuine improvements.
-
-**`flake-detector`** runs an AI agent across an evaluation suite $N$ times and computes true statistical consistency. It exposes the widening gap between **"can succeed"** (`pass@k`) and **"always succeeds"** (`pass^k`), flags flaky tasks with Wilson 95% confidence intervals, and provides a statistical regression check that can fail a CI build when a prompt change degrades dependability.
+**`flake-detector`** runs your agent suite $N$ times and computes rigorous consistency statistics: per-task Wilson 95% confidence intervals, the gap between **can succeed** (`pass@k`) and **always succeeds** (`pass^k`), and an automated regression gate for CI pipelines.
 
 ---
 
@@ -35,13 +28,14 @@ Because LLMs and autonomous agents are non-deterministic, a single run conceals 
 
 ### 1. Installation
 
-Clone and install `flake-detector` in editable mode:
-
 ```bash
 git clone https://github.com/loksai-codes/flake-detector.git
 cd flake-detector
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# Linux / macOS:
+source .venv/bin/activate
+# Windows:
+.venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
@@ -50,143 +44,136 @@ pip install -e ".[dev]"
 Run the included 12-task simulation suite 20 times per task with $k=5$:
 
 ```bash
-flake run --suite suites/demo_sim.yaml --agent sim --runs 20 --k 5 --seed 42
+flake run --suite suites/demo_sim.yaml --agent sim --runs 20 --k 5 --seed 42 --out results/
 ```
 
-Outputs will be saved atomically to `results/<run_id>.json`.
-
-### 3. Generate Reports & Charts
-
-Generate a rich Markdown report and Matplotlib consistency charts:
+### 3. View the Report & Visualizations
 
 ```bash
-flake report results/2026-10-26T11-30-00_demo-sim_sim.json --out report.md --charts-dir charts/
-```
-
-### 4. Regression Check in CI
-
-Compare two evaluation runs to detect significant regressions:
-
-```bash
-flake compare results/baseline.json results/candidate.json --fail-on-regression
+flake report results/2026-10-26T06-58-22_demo-sim_sim.json --out report.md --charts-dir charts/
 ```
 
 ---
 
-## 📐 Concepts & Mathematical Rigor
+## 📊 What You Get (*Simulated Data*)
 
-### 1. Wilson 95% Confidence Interval
-Standard Wald intervals ($\hat{p} \pm z\sqrt{\hat{p}(1-\hat{p})/n}$) fail dramatically near 0% and 100% or on small sample sizes. `flake-detector` uses the **Wilson score interval** ($z = 1.96$):
+When evaluating agents, `flake-detector` generates publication-quality Matplotlib consistency charts and an actionable Markdown audit report.
 
-$$\text{center} = \frac{p + \frac{z^2}{2n}}{1 + \frac{z^2}{n}}, \quad \text{half} = \frac{z \sqrt{\frac{p(1-p)}{n} + \frac{z^2}{4n^2}}}{1 + \frac{z^2}{n}}$$
+<p align="center">
+  <img src="examples/charts/pass_curves.png" alt="Dependability Gap Curve" width="600"/>
+</p>
 
-$$\text{Interval} = \left[\max(0, \, \text{center} - \text{half}), \; \min(1, \, \text{center} + \text{half})\right]$$
+### Report Excerpt (`demo-sim` — 12 tasks, $n=20$, $k=5$)
 
-### 2. `pass@k` vs `pass^k`: The Dependability Gap
+> *The following data represents an actual execution of the simulated agent (`examples/sample_report.md`):*
 
-For a task with $n$ runs and $c$ successes:
+- **Mean pass@1 (Success Rate):** 56.2%
+- **Mean pass^5 (All 5 Succeed):** 32.0%
+- **Mean pass@5 (At least 1 Succeeds):** 85.5%
+- **Task Distribution:** 25.0% consistent (3), 66.7% flaky (8), 8.3% failing (1)
+- **Mean Latency:** 433.4 ms | **Total Tokens:** 12,571
 
-- **$\text{pass}@k$ (Optimistic):** Probability that at least one of $k$ sampled runs succeeds (*"Can the agent solve this?"*):
-  $$\text{pass}@k = 1 - \frac{\binom{n-c}{k}}{\binom{n}{k}} \quad (\text{equals } 1.0 \text{ if } n - c < k)$$
+| Task ID | Category | Runs ($n$) | Passes ($c$) | Success Rate | 95% CI (Wilson) | pass@5 | pass^5 | Status |
+|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---|
+| `math-mult-01` | math | 20 | 20 | 1.000 | [0.839, 1.000] | 1.000 | 1.000 | `consistent` |
+| `format-upper-01` | formatting | 20 | 20 | 1.000 | [0.839, 1.000] | 1.000 | 1.000 | `consistent` |
+| `math-add-01` | math | 20 | 19 | 0.950 | [0.764, 0.991] | 1.000 | 0.750 | `flaky` |
+| `math-sqrt-01` | math | 20 | 12 | 0.600 | [0.387, 0.781] | 0.996 | 0.051 | `flaky` |
+| `math-div-01` | math | 20 | 10 | 0.500 | [0.299, 0.701] | 0.984 | 0.016 | `flaky` |
+| `reason-capital-01` | reasoning | 20 | 9 | 0.450 | [0.258, 0.658] | 0.970 | 0.008 | `flaky` |
+| `reason-trick-01` | reasoning | 20 | 0 | 0.000 | [0.000, 0.161] | 0.000 | 0.000 | `failing` |
 
-- **$\text{pass}^k$ (Dependable):** Probability that **all** $k$ sampled runs succeed (*"Can we rely on this agent?"*):
-  $$\text{pass}^k = \frac{\binom{c}{k}}{\binom{n}{k}} \quad (\text{equals } 0.0 \text{ if } c < k)$$
+---
 
-#### Worked Example ($n=10, c=3$)
+## 📐 How `pass@k` and `pass^k` Differ
 
-Consider a flaky task that succeeded in 3 out of 10 runs:
+Conventional benchmarks often report $\text{pass}@k$—the probability that **at least one** of $k$ independent sampled runs succeeds. While useful for code generation search spaces, $\text{pass}@k$ gives a dangerously inflated impression of production reliability:
 
-| $k$ | $\text{pass}@k$ (Can succeed) | $\text{pass}^k$ (Always succeeds) | The Dependability Reality |
+$$\text{pass}@k = 1 - \frac{\binom{n-c}{k}}{\binom{n}{k}} \quad (\text{equals } 1.0 \text{ if } n - c < k)$$
+
+In contrast, **$\text{pass}^k$** measures dependability: the probability that **all** $k$ samples succeed without a single breakdown:
+
+$$\text{pass}^k = \frac{\binom{c}{k}}{\binom{n}{k}} \quad (\text{equals } 0.0 \text{ if } c < k)$$
+
+### Worked Example ($n=10, c=3$)
+
+Consider an agent task with 3 successes in 10 runs ($p=0.30$):
+
+| Sample ($k$) | $\text{pass}@k$ (Can succeed) | $\text{pass}^k$ (Always succeeds) | The Reliability Reality |
 |:---:|:---:|:---:|:---|
-| **$k=1$** | $0.3000$ | $0.3000$ | Base success rate is 30%. |
-| **$k=2$** | $0.5333$ | $0.0667$ | Given 2 attempts, it might succeed half the time, but only 6.7% reliable. |
-| **$k=5$** | **$0.9167$** | **$0.0000$** | With 5 attempts, it has a 92% chance to pass at least once, but **0%** chance of consistency! |
-
-### 3. Flakiness Score & Task Status
-- **Flakiness Score:** $4 \cdot p \cdot (1 - p)$ (ranges from $0.0$ for strictly consistent/failing tasks up to $1.0$ at maximum uncertainty $p=0.5$).
-- **Task Status:**
-  - `consistent`: $c = n$ (100% success rate across all runs)
-  - `failing`: $c = 0$ (0% success rate)
-  - `flaky`: $0 < c < n$ (intermittent success)
+| **$k=1$** | $0.3000$ | $0.3000$ | Baseline success rate. |
+| **$k=2$** | $0.5333$ | $0.0667$ | Allowed 2 tries, it solves it half the time, but only 6.7% reliable. |
+| **$k=5$** | **$0.9167$** | **$0.0000$** | With 5 attempts, it has a 92% chance to pass once, but **0%** dependability! |
 
 ---
 
-## 🛠️ CLI Reference
+## 🤖 Running on a Real Agent with Groq
 
-```
-Usage: flake [OPTIONS] COMMAND [ARGS]...
+`flake-detector` includes a tool-calling agent adapter for Groq's high-speed API:
 
-Commands:
-  run      Execute an evaluation suite with an agent N times per task.
-  report   Generate Markdown report and Matplotlib consistency charts.
-  compare  Compare two runs and detect statistical regressions.
-```
-
-### `flake run`
-```bash
-flake run --suite PATH \
-          --agent sim|groq \
-          --runs 20 \
-          --k 5 \
-          --seed 42 \
-          [--workers 8] \
-          [--out results/] \
-          [--resume] \
-          [--max-rpm 20] \
-          [--model llama-3.3-70b-versatile]
-```
-
-- `--resume`: Skips runs already recorded in the results file (resilience against rate-limits).
-- `--seed`: Ensures seed derivation is bit-for-bit deterministic regardless of worker thread concurrency.
-
-### `flake report`
-```bash
-flake report results/run.json --out report.md --charts-dir charts/
-```
-Generates:
-1. `pass_curves.png`: Plots mean $\text{pass}@k$ and $\text{pass}^k$ for $k=1..K$, visually shading the flakiness gap.
-2. `task_rates.png`: Horizontal bar chart of per-task success rates with Wilson 95% error bars sorted by performance.
-3. Formatted Markdown tables with failure reason breakdowns.
-
-### `flake compare`
-```bash
-flake compare baseline.json candidate.json [--alpha 0.05] [--fail-on-regression]
-```
-- Performs a per-task non-overlapping Wilson interval test.
-- Computes a paired bootstrap test over tasks (1000 resamples, fixed seed) on the difference in mean success rate.
-- **Exit code 0:** No regression detected.
-- **Exit code 1:** Significant regression detected (only when `--fail-on-regression` is set).
-- **Exit code 2:** Config or schema validation error.
-
----
-
-## 🤖 Running with Groq
-
-`flake-detector` includes a first-class agent adapter for Groq's high-speed OpenAI-compatible API:
-
-1. **Obtain an API key** from [console.groq.com](https://console.groq.com).
-2. **Configure environment:**
+1. Obtain an API key from [console.groq.com](https://console.groq.com).
+2. Configure `.env`:
    ```bash
    cp .env.example .env
-   # Add your key to .env:
+   # Set your key and preferred model:
    # GROQ_API_KEY=gsk_...
    # GROQ_MODEL=llama-3.3-70b-versatile
    ```
-3. **Run Groq evaluation:**
+3. Run the Groq demo suite:
    ```bash
    flake run --suite suites/demo_groq.yaml --agent groq --runs 10 --k 3 --max-rpm 20
    ```
 
-### Built-in Robustness
-- **Safe Tools:** Includes an AST-based calculator (safe arithmetic without `eval`/`exec`) and factual lookup tools.
-- **Rate-Limit Handling:** Token-bucket `--max-rpm` throttling and exponential backoff retry (base 1s, factor 2, max 30s) honoring HTTP 429 `Retry-After` headers.
-- **Secrets Security:** API keys are never stored in results JSON, logs, or commit histories.
+- **Safe AST Tools:** Includes an AST-based calculator (safe arithmetic without `eval`/`exec`) and factual dictionary lookup.
+- **Throttling & Backoff:** Thread-safe `--max-rpm` limiter and exponential backoff retry ($1\text{s}, 2\text{s}, 4\text{s}, 8\text{s}, 16\text{s}, 30\text{s}$) with `Retry-After` header adherence on HTTP 429.
+- **Zero Key Leaks:** API keys are never stored in results JSON or git commits.
+
+---
+
+## 🚀 CI/CD Usage: Statistical Regression Gating
+
+Integrate `flake compare` into GitHub Actions to automatically fail pull requests that degrade consistency:
+
+```yaml
+# .github/workflows/eval.yml
+name: Prompt Regression Gate
+
+on: [pull_request]
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install flake-detector
+        run: pip install -e .
+
+      - name: Run Candidate Evaluation
+        run: |
+          flake run --suite suites/demo_sim.yaml --agent sim --runs 20 --k 5 --seed 42 --out results/candidate.json
+
+      - name: Check for Regressions against Baseline
+        run: |
+          flake compare results/baseline.json results/candidate.json --fail-on-regression
+```
+
+### Statistical Comparison Method
+- **Per-Task:** Flags significant change only when two Wilson 95% confidence intervals do not overlap.
+- **Suite-Level:** Performs a paired bootstrap over shared tasks (1,000 resamples, fixed seed) on the difference in mean success rate.
+- **Verdict:** An exit code of `1` is triggered **only** if the upper bound of the 95% bootstrap confidence interval is strictly below zero ($\text{CI}_{\text{upper}} < 0$).
 
 ---
 
 ## 📊 Results with Groq
 
-> *Note: Benchmark numbers should never be fabricated. Below is the experimental ledger to record real empirical runs:*
+> *Empirical evaluation records for real LLM runs (to be filled by the repo owner after running with a live Groq key):*
 
 | Date | Suite | Model | Runs ($n$) | $k$ | Mean $\text{pass}@1$ | Mean $\text{pass}^k$ | Consistent | Flaky | Failing |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -195,48 +182,57 @@ flake compare baseline.json candidate.json [--alpha 0.05] [--fail-on-regression]
 
 ---
 
-## 🏗️ Repository Architecture
+## 🏛️ Project Architecture & Design Choices
 
 ```text
 flake-detector/
-├── .github/workflows/ci.yml # GitHub Actions CI matrix (Python 3.11, 3.12)
-├── assets/logo.svg          # Project branding
-├── examples/                # Sample evaluation results and generated reports
-│   ├── sample_results.json
-│   ├── sample_report.md
-│   └── charts/
-├── prompts/                 # Guided build milestones (00 to 05)
-├── suites/                  # YAML evaluation suites
+├── .github/workflows/ci.yml # Multi-version CI matrix (Python 3.11, 3.12)
+├── assets/logo.svg          # GitHub-camo-compatible vector branding
+├── examples/                # Verified empirical sample outputs
+│   ├── charts/              # Publication charts (pass_curves.png, task_rates.png)
+│   ├── sample_report.md     # Generated 5-section Markdown audit report
+│   └── sample_results.json  # Raw run records with timing and token usage
+├── suites/                  # Evaluation task suites (YAML)
 │   ├── demo_sim.yaml        # 12-task simulation suite (math, formatting, reasoning)
-│   └── demo_groq.yaml       # 10-task Groq tool-use suite
+│   ├── demo_sim_degraded.yaml # Degraded suite for CI regression testing
+│   └── demo_groq.yaml       # 10-task Groq evaluation suite
 ├── src/flake_detector/
-│   ├── models.py            # Pydantic v2 schemas
-│   ├── metrics.py           # Wilson intervals, pass@k, pass^k, suite summary
+│   ├── models.py            # Pydantic v2 schemas for tasks, suites, and results
+│   ├── metrics.py           # Pure statistical formulas (Wilson, pass@k, pass^k)
 │   ├── grading.py           # Deterministic graders (exact, contains, regex, numeric)
 │   ├── suite.py             # YAML loader with sha256_12 provenance
-│   ├── runner.py            # Concurrent execution engine & resume support
-│   ├── storage.py           # Atomic JSON persistence
-│   ├── report.py            # Markdown reporter & Matplotlib charts
+│   ├── runner.py            # Deterministic multithreaded execution engine
+│   ├── storage.py           # Atomic file persistence (tempfile -> replace)
+│   ├── report.py            # Markdown reporter and Matplotlib chart generator
 │   ├── compare.py           # Regression comparator with paired bootstrap
-│   ├── cli.py               # Typer CLI application
+│   ├── cli.py               # Typer CLI application with Rich formatting
 │   └── agents/
 │       ├── base.py          # Agent protocol
-│       ├── simulated.py     # Deterministic simulation agent
-│       ├── groq_agent.py    # Groq OpenAI-compatible tool agent
-│       └── tools.py         # AST calculator and lookup tools
-└── tests/                   # Pytest test suite (100% offline, zero network in CI)
+│       ├── simulated.py     # Deterministic simulation agent (stable hashing)
+│       ├── groq_agent.py    # OpenAI-compatible Groq adapter with backoff
+│       └── tools.py         # AST safe calculator and factual lookup
+└── tests/                   # 40 offline unit tests (100% network-free)
 ```
 
----
-
-## 🔒 Security & Privacy
-
-- `.env` is strictly `.gitignore`d.
-- Results files contain run metadata, timings, prompts, and answers, but **never secrets or API keys**.
-- The safe calculator operates via Python's `ast` parser, prohibiting code injection, arbitrary attribute lookups, or system calls.
+### Design Choices & Limitations
+1. **Deterministic Graders Only (v1):** Graders use exact, contains, regex, and tolerance-checked numeric comparisons. v1 deliberately excludes LLM-as-a-judge to keep evaluation costs zero and test results reproducible.
+2. **Deterministic Seed Derivation:** Seeds for every run are derived from `hashlib.sha256(f"{seed}:{task_id}:{run_index}")`. Single-threaded and multi-threaded runs produce bit-for-bit identical results.
+3. **Small Sample Caveat:** When evaluating with small sample sizes ($n < 10$), confidence intervals are inherently wide. `flake-detector` explicitly surfaces these intervals rather than masking uncertainty behind point estimates.
 
 ---
 
-## 📄 License
+## 🔒 Security & Secrets Audit
 
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
+- `.env` is permanently excluded via `.gitignore`.
+- Run results contain timing, tokens, prompts, and answers, but **never API keys**.
+- The calculator uses Python's `ast` parser to reject code execution, system calls, and attribute lookups.
+
+---
+
+## 📄 License & Contact
+
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
+
+- **Author:** Loksai Palyam
+- **GitHub:** [@loksai-codes](https://github.com/loksai-codes)
+- **Repository:** [https://github.com/loksai-codes/flake-detector](https://github.com/loksai-codes/flake-detector)

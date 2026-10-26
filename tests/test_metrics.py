@@ -126,3 +126,46 @@ def test_suite_summary_and_pass_curves() -> None:
     assert curves["k"] == [1.0, 2.0]
     assert len(curves["pass_at_k"]) == 2
     assert len(curves["pass_hat_k"]) == 2
+
+
+def test_metrics_edge_cases_and_validations() -> None:
+    """Verify bounds checks, invalid inputs, and empty collection handling."""
+    # Wilson interval edge cases
+    assert wilson_interval(0, 0) == (0.0, 0.0)
+    with pytest.raises(ValueError, match="Successes c"):
+        wilson_interval(5, 4)
+    with pytest.raises(ValueError, match="Successes c"):
+        wilson_interval(-1, 5)
+
+    # pass@k edge cases
+    with pytest.raises(ValueError, match="k must be >= 1"):
+        pass_at_k(5, 2, 0)
+    with pytest.raises(ValueError, match="must be >= k"):
+        pass_at_k(4, 2, 5)
+    with pytest.raises(ValueError, match="Successes c"):
+        pass_at_k(5, 6, 2)
+    assert pass_at_k(5, 0, 2) == 0.0
+    assert pass_at_k(5, 5, 2) == 1.0
+
+    # pass^k edge cases
+    with pytest.raises(ValueError, match="k must be >= 1"):
+        pass_hat_k(5, 2, 0)
+    with pytest.raises(ValueError, match="must be >= k"):
+        pass_hat_k(4, 2, 5)
+    with pytest.raises(ValueError, match="Successes c"):
+        pass_hat_k(5, 6, 2)
+    assert pass_hat_k(5, 1, 2) == 0.0
+
+    # flakiness edge cases
+    assert flakiness(0, 0) == 0.0
+    with pytest.raises(ValueError, match="Successes c"):
+        flakiness(5, 4)
+
+    # empty suite summary and pass curves
+    empty_summary = suite_summary([], k=2)
+    assert empty_summary["total_tasks"] == 0
+    assert empty_summary["total_runs"] == 0
+
+    empty_curves = pass_curves([], max_k=3)
+    assert empty_curves["pass_at_k"] == [0.0, 0.0, 0.0]
+

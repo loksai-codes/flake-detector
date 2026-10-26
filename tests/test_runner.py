@@ -146,3 +146,40 @@ def test_storage_round_trip(tmp_path: Path) -> None:
 
     loaded = load_results(target_file)
     assert loaded.model_dump() == results.model_dump()
+
+
+def test_runner_validations_and_error_mappings() -> None:
+    """Verify runner validates parameters and classifies diverse agent error strings."""
+    import pytest
+    suite = _create_test_suite()
+    agent = SimulatedAgent()
+
+    with pytest.raises(ValueError, match="runs must be >= 1"):
+        run_suite(suite, agent, runs=0, seed=42)
+
+    with pytest.raises(ValueError, match="must satisfy 1 <= k <= runs"):
+        run_suite(suite, agent, runs=5, k=10, seed=42)
+
+    # Test error mapping in _execute_single_run
+    class TimeoutAgent:
+        name = "timeout"
+        model = None
+        config: dict = {}
+
+        def run(self, task: Task, seed: int) -> AgentOutput:
+            return AgentOutput(answer=None, error="Execution timeout after 5000ms")
+
+    res_timeout = run_suite(suite, TimeoutAgent(), runs=1, seed=42)
+    assert res_timeout.tasks[0].runs[0].failure_reason == "timeout"
+
+    class MaxStepsAgent:
+        name = "max_steps"
+        model = None
+        config: dict = {}
+
+        def run(self, task: Task, seed: int) -> AgentOutput:
+            return AgentOutput(answer=None, error="Exceeded max_steps limit")
+
+    res_steps = run_suite(suite, MaxStepsAgent(), runs=1, seed=42)
+    assert res_steps.tasks[0].runs[0].failure_reason == "max_steps"
+

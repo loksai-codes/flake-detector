@@ -2,6 +2,8 @@
 
 from typing import Any
 
+import pytest
+
 from flake_detector.agents.groq_agent import GroqAgent, calculate_backoff_delay
 from flake_detector.agents.tools import calculator, lookup_fact
 from flake_detector.models import GraderSpec, Suite, Task
@@ -210,3 +212,52 @@ def test_api_key_never_serialized() -> None:
 
     assert secret_key not in serialized
     assert secret_key not in repr(results)
+
+
+def test_groq_agent_missing_key_and_jitter(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify missing API key raises clear error and jitter modifies backoff delay."""
+    import random
+
+    # Jitter check
+    rng = random.Random(42)
+    d_no_jitter = calculate_backoff_delay(3, jitter=False)
+    d_jitter = calculate_backoff_delay(3, jitter=True, rng=rng)
+    assert d_no_jitter == 4.0
+    assert d_jitter > d_no_jitter
+
+    # Prevent reload from local .env file
+    monkeypatch.setattr("flake_detector.agents.groq_agent.load_dotenv", lambda: None)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+
+    with pytest.raises(ValueError, match="GROQ_API_KEY is not set"):
+        GroqAgent(api_key=None, client=None)
+
+
+def test_groq_agent_http_429_retry_mocked() -> None:
+    """Verify HTTP 429 rate limit triggers exponential backoff retry and succeeds."""
+    class FakeHttpError(Exception):
+        def __init__(self, status_code: int, retry_after: str | None = None) -> None:
+            self.status_code = status_code
+            headers = {}
+            if retry_after is not None:
+                headers["Retry-After"] = retry_after
+            self.response = type("Resp", (), {"status_code": status_code, "headers": headers})()
+
+    # Call 1: HTTP 429 error
+    err = FakeHttpError(429, retry_after="0.01")
+    # Call 2: Success
+    msg = FakeMessage(content="Success after rate limit")
+
+    fake_client = FakeOpenAIClient([err, FakeResponse(msg)])
+    agent = GroqAgent(api_key="mock_key", client=fake_client)
+
+    task = Task(
+        id="t-retry",
+        prompt="retry prompt",
+        grader=GraderSpec(type="contains", expected="Success"),
+    )
+    out = agent.run(task, seed=42)
+
+    assert out.answer == "Success after rate limit"
+    assert out.error is None
+
