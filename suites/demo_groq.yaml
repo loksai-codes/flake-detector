@@ -1,0 +1,83 @@
+name: demo-groq
+description: Compact 10-task evaluation suite exercising tool calling with Groq API
+tasks:
+  - id: groq-math-01
+    category: math
+    prompt: "What is 23 * 47? Use the calculator tool and answer with just the numeric result."
+    grader:
+      type: numeric
+      expected: 1081
+      abs_tol: 0.0
+
+  - id: groq-math-02
+    category: math
+    prompt: "What is 1500 / 12? Use the calculator tool and answer with just the number."
+    grader:
+      type: numeric
+      expected: 125
+      abs_tol: 0.0
+
+  - id: groq-math-03
+    category: math
+    prompt: "What is 2 raised to the 8th power (2 ** 8)? Use the calculator tool."
+    grader:
+      type: numeric
+      expected: 256
+      abs_tol: 0.0
+
+  - id: groq-fact-01
+    category: facts
+    prompt: "What is the capital of France? Use the lookup_fact tool with key 'capital_of_france'."
+    grader:
+      type: exact
+      expected: "Paris"
+      case_sensitive: true
+      strip: true
+
+  - id: groq-fact-02
+    category: facts
+    prompt: "What year did Apollo 11 land on the moon? Use lookup_fact with key 'apollo_11_year'."
+    grader:
+      type: numeric
+      expected: 1969
+      abs_tol: 0.0
+
+  - id: groq-fact-03
+    category: facts
+    prompt: "Who created the Python programming language? Use lookup_fact with key 'python_creator'."
+    grader:
+      type: contains
+      expected: "Guido van Rossum"
+      case_sensitive: false
+
+  - id: groq-format-01
+    category: formatting
+    prompt: "Return the word 'orange' in all uppercase letters."
+    grader:
+      type: exact
+      expected: "ORANGE"
+      case_sensitive: true
+      strip: true
+
+  - id: groq-format-02
+    category: formatting
+    prompt: 'Output a valid JSON object with key "status" set to "active".'
+    grader:
+      type: regex
+      pattern: '\{\s*"status"\s*:\s*"active"\s*\}'
+
+  - id: groq-math-04
+    category: math
+    prompt: "What is 125 + 875?"
+    grader:
+      type: numeric
+      expected: 1000
+      abs_tol: 0.0
+
+  - id: groq-format-03
+    category: formatting
+    prompt: "Write a short sentence containing the word 'consistent'."
+    grader:
+      type: contains
+      expected: "consistent"
+      case_sensitive: false

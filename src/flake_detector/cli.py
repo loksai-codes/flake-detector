@@ -37,7 +37,9 @@ def run(
     runs: int = typer.Option(20, "--runs", "-n", help="Number of runs per task"),
     k: int = typer.Option(5, "--k", "-k", help="Sample size k for pass@k and pass^k"),
     seed: int = typer.Option(42, "--seed", help="Deterministic base seed"),
-    workers: int = typer.Option(8, "--workers", "-w", help="Number of worker threads"),
+    workers: int | None = typer.Option(
+        None, "--workers", "-w", help="Worker threads (default: 8 for sim, 1 for groq)"
+    ),
     out: Path = typer.Option(Path("results"), "--out", "-o", help="Output directory or file"),
     resume: bool = typer.Option(False, "--resume", help="Skip runs already present in results"),
     max_rpm: int = typer.Option(20, "--max-rpm", help="Rate limit for API calls (Groq)"),
@@ -116,6 +118,8 @@ def run(
     console.print(Panel(header_msg, border_style="cyan"))
 
     # 4. Execution with Rich Progress
+    actual_workers = workers if workers is not None else (1 if agent_type == "groq" else 8)
+
     with Progress(
         TextColumn("[progress.description]{task.description}"),
         BarColumn(complete_style="cyan", finished_style="green"),
@@ -133,7 +137,7 @@ def run(
             agent=agent_obj,
             runs=runs,
             seed=seed,
-            workers=workers,
+            workers=actual_workers,
             k=k,
             suite_sha256=sha256_12,
             existing=existing_results,
