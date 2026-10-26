@@ -1,0 +1,122 @@
+name: demo-sim
+description: Mixed 12-task suite demonstrating flakiness across consistent, flaky, and failing tasks
+tasks:
+  - id: math-mult-01
+    category: math
+    prompt: "What is 17 * 23? Answer with just the number."
+    grader:
+      type: numeric
+      expected: 391
+      abs_tol: 0.0
+    sim:
+      p_success: 1.0
+
+  - id: format-upper-01
+    category: formatting
+    prompt: "Return the word 'blue' in uppercase."
+    grader:
+      type: exact
+      expected: "BLUE"
+      case_sensitive: true
+      strip: true
+    sim:
+      p_success: 1.0
+
+  - id: format-contains-01
+    category: formatting
+    prompt: "Write a short sentence that mentions the word 'flaky'."
+    grader:
+      type: contains
+      expected: "flaky"
+      case_sensitive: false
+    sim:
+      p_success: 0.95
+
+  - id: math-add-01
+    category: math
+    prompt: "What is 125 + 375?"
+    grader:
+      type: numeric
+      expected: 500
+      abs_tol: 0.0
+    sim:
+      p_success: 0.95
+
+  - id: math-div-01
+    category: math
+    prompt: "What is 1000 / 8?"
+    grader:
+      type: numeric
+      expected: 125
+      abs_tol: 0.0
+    sim:
+      p_success: 0.65
+
+  - id: format-json-01
+    category: formatting
+    prompt: "Output a JSON object with key 'status' set to 'ok'."
+    grader:
+      type: regex
+      pattern: '\{\s*"status"\s*:\s*"ok"\s*\}'
+    sim:
+      p_success: 0.55
+
+  - id: reason-capital-01
+    category: reasoning
+    prompt: "What is the capital of France?"
+    grader:
+      type: exact
+      expected: "Paris"
+      case_sensitive: true
+      strip: true
+    sim:
+      p_success: 0.50
+
+  - id: math-sqrt-01
+    category: math
+    prompt: "What is the square root of 144?"
+    grader:
+      type: numeric
+      expected: 12
+      abs_tol: 0.0
+    sim:
+      p_success: 0.45
+
+  - id: format-slug-01
+    category: formatting
+    prompt: "Convert 'Hello World' into a URL slug (lowercase with hyphen)."
+    grader:
+      type: exact
+      expected: "hello-world"
+      case_sensitive: true
+    sim:
+      p_success: 0.40
+
+  - id: reason-logic-01
+    category: reasoning
+    prompt: "If all As are Bs and some Bs are Cs, are all As necessarily Cs? Answer 'True' or 'False'."
+    grader:
+      type: exact
+      expected: "False"
+      case_sensitive: true
+    sim:
+      p_success: 0.20
+
+  - id: math-power-01
+    category: math
+    prompt: "What is 2 raised to the 10th power?"
+    grader:
+      type: numeric
+      expected: 1024
+      abs_tol: 0.0
+    sim:
+      p_success: 0.10
+
+  - id: reason-trick-01
+    category: reasoning
+    prompt: "What is the secret passkey? (Impossible trick task)"
+    grader:
+      type: exact
+      expected: "supersecret123"
+    sim:
+      p_success: 0.0
